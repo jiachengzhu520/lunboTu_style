@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="css/lunbo02.css">
+</head>
+<body>
+<div class="all" id='all'>
+    <div class="screen" id="screen">
+        <ul id="ul">
+            <li><img src="img/01.jpg"/></li>
+            <li><img src="img/02.jpg"/></li>
+            <li><img src="img/03.jpg"/></li>
+            <li><img src="img/04.jpg"/></li>
+            <li><img src="img/05.jpg"/></li>
+        </ul>
+        <ol>
+
+        </ol>
+        <div id="arr">
+            <span id="left"><</span>
+            <span id="right">></span>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    window.onload = function () {
+        //需求：无缝滚动。
+        //思路：赋值第一张图片放到ul的最后，然后当图片切换到第五张的时候
+        //     直接切换第六张(第一张的副本)
+        // ，再次从第一张切换到第二张的时候先瞬间切换到
+        //     第一张图片，然后滑动到第二张
+        //步骤：
+        //1.获取事件源及相关元素。（老三步）
+        //2.复制第一张图片所在的li,添加到ul的最后面。
+        //3.给ol中添加li，ul中的个数-1个，并点亮第一个按钮。
+        //4.鼠标放到ol的li上切换图片
+        //5.添加定时器
+        //6.左右切换图片（鼠标放上去隐藏，移开显示）
+
+
+        //1.获取事件源及相关元素。
+        var screen = document.getElementById("screen");
+        var ul = screen.children[0];
+        var ol = screen.children[1];
+        var div = screen.children[2];
+        var imgWidth = screen.offsetWidth;//用offsetWidth 属性获得大div的宽也就是screen的宽500px;
+        //2
+        var tempLi = ul.children[0].cloneNode(true);//cloneNode(true) 是深克隆  把ul的第一个li 克隆
+        ul.appendChild(tempLi); //追加到ul的末尾
+        //3
+        for(var i = 0; i < ul.children.length - 1; i++) {//遍历li
+            var newOlLi = document.createElement("li");//创建li 并赋值给newOlLif
+            newOlLi.innerHTML = i + 1;//newOlLif 的个数
+            ol.appendChild(newOlLi);//把li追加到ol上。
+        }
+        var olLiArr = ol.children;//把ol的li 赋值给 olLiArr
+        olLiArr[0].className = "current";//把current 给ol的第一个子元素。
+        //4
+        for(var i = 0, len = olLiArr.length; i < len; i++) { //遍历ol的li
+            olLiArr[i].index = i;//确定li 的下标
+            olLiArr[i].onmouseover = function (ev) { //当鼠标滑到ol的li触发的一系列生理反应
+                for(var j = 0; j < len; j++) {//第一个反应是遍历
+                    olLiArr[j].className = "";//然后清除每个li的class属性
+                }
+                this.className = "current";//再然后是给当前的li赋值class="current"属性
+                key = square = this.index;//把当前li的下标赋值给square key
+                animate(ul, -this.index * imgWidth);//animate 是css动画属性 此处是让ul减去 当前li的下标数*大div screen的宽
+            }
+        }
+        //5 现在开始添加定时器
+        var key = 0; //此处的key  sqaure 与上面的key square  不是同一个
+        var square = 0;
+        var timer = setInterval(autoPlay, 2000);
+        screen.onmouseover = function (ev) {//至于为什么是ev ev 就是MouseEvent  因为ev是事件的参数啊。
+            // console.log(ev);
+            // 在ev中包含了事件触发时的参数，比如click事件的ev中包含着.e.pageX,e.pageY,keydown事件中包含着ev.keyCode等，
+            // 在ie中，ev是全局的可以通过window.event来获取，在其他浏览器中都是作为参数传入的。
+
+            //下面是鼠标滑到screen时设置的一系列生理反应
+            clearInterval(timer);//第一个是定时器停止 页面的表现是图片不动
+            div.style.display = "block";//第二个设置是让两边的小箭头隐藏。
+        }
+        screen.onmouseout = function (ev) {
+            timer = setInterval(autoPlay, 2000);//第一步 启动定时器  并以两秒的速度轮播。
+            div.style.display = "none";//当鼠标移除时让两边的小箭头隐藏
+        }
+        //6左右切换图片（鼠标放上去隐藏，移开显示）
+        var divArr = div.children; //把左右两个小箭头赋值给divArr
+        divArr[0].onclick = function (ev) {//点击第一个小箭头而触发的函数
+            key--;
+            if(key < 0) {//如果key小于0
+                ul.style.left = -(ul.children.length-1) * imgWidth + "px";//ul向左移的步长是li的个数*宽度 加上 单位
+                key = 4;  //然后从下标为4的数字开始
+            }
+            animate(ul, -key * imgWidth);
+            square--;
+            if(square < 0) {//如果小方形下标小于0
+                square = 4; //就要从下标为4 开始。
+            }
+            for(var k = 0; k < len; k++) {
+                olLiArr[k].className = "";
+            }
+            olLiArr[square].className = "current";
+        }
+        divArr[1].onclick = autoPlay;
+        // 以下有些看不明白
+        function autoPlay() {
+            key++;
+            //当不满足下面的条件的时候，轮播图到了最后一个孩子，进入条件中后，瞬移到
+            //第一张，继续滚动。
+            if(key > ul.children.length - 1) {
+                ul.style.left = 0;
+                key = 1;
+            }
+            animate(ul, -key * imgWidth);
+            square++;
+            if(square > 4) {
+                square = 0;
+            }
+            for(var k = 0; k < len; k++) { //k是指下面的小按钮  k 值<li的个数
+                olLiArr[k].className = "";//给所有的按钮清除class属性。
+            }
+            olLiArr[square].className = "current"; //给当前的小方块加上class为current属性。
+        }
+        function animate(ele,target){   //声明一个animate 函数 并给与两个参数
+            clearInterval(ele.timer); //清除当前元素的动画
+            var speed = target>ele.offsetLeft?10:-10; //10是指图片过渡的时间
+            ele.timer = setInterval(function () {
+                var val = target - ele.offsetLeft;
+                ele.style.left = ele.offsetLeft + speed + "px";
+                if(Math.abs(val)<Math.abs(speed)){
+                    ele.style.left = target + "px";
+                    clearInterval(ele.timer);
+                }
+            },10)
+        }
+
+    }
+</script>
+</html>

@@ -1,0 +1,50 @@
+lunbo3 的布局
+
+html 布局：
+首先是一个大div 包含两个小盒子一个是div包含左右两个按钮，一个是ul包含li中的img.
+
+<div>
+    <div></div>
+    <ul></ul>
+</div>
+然后是一个大div包含四个div按钮.作为下面的四个小圆点
+<div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+</div>
+
+
+css:样式重点逻辑：
+
+1.包含图片和左右两个键的盒子 设溢出隐藏 ，并且设为相对定位。相对定位也可left ，top.
+2.ul的宽设的可以容下所有li的宽。
+3.ul设置了transition:all 1s   1秒的过渡时间;
+4.li 设置float:left;
+5.左右两个箭头设置了z-index  和绝对定位
+
+
+js:逻辑分析：
+
+第一步：声明变量：
+  var count=0;
+  var isgo=false;
+  var timer
+
+
+第二步：获取元素：
+在匿名函数中首先获取
+ul 所有li 图片元素  控制方向的箭头元素 下方的所有按钮元素
+并给按钮元素的第一个原点按钮加背景色 aqua
+
+第三步设置定时器控制图片移动：
+
+showtime()
+使用了闭包；
+
+拓展小知识：document.getElementsByClassName 返回具有给定类名的元素列表。
+即使只有一个元素具有这个类名，它也将出现在节点列表中，这就是为什么必须使用[0]
+
+
+
